@@ -1,3 +1,16 @@
-In this work, we have used classical machine learning models and small language models to analyze experimental conversion from ZnO to ZIF-8.
+### Note on LoRA configuration across models
 
-zif8_synthesis_data.csv is the dataset taken from ACS Appl. Mater. Interfaces 18, 7, 12199-12211 (2026).
+The SFT scripts for Gemma-2, Phi-2, Qwen, and TinyLlama share the same
+training hyperparameters (batch size, gradient accumulation, epochs,
+learning rate). The only intentional difference is `target_modules` in
+`LoraConfig`, which depends on each model's internal layer naming:
+
+| Model family      | target_modules                                      |
+|-------------------|--------------------------------------------------------|
+| Gemma-2 / Phi-2    | q_proj, k_proj, v_proj, dense, fc1, fc2              |
+| Qwen / TinyLlama   | q_proj, k_proj, v_proj, o_proj                       |
+
+This difference is required because these architectures use different
+names for their attention output and MLP projection layers. It is not
+an inconsistency between scripts. All other hyperparameters are held
+constant across models to keep the comparison fair.
